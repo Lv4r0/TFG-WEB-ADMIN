@@ -1,15 +1,14 @@
-# Usamos Eclipse Temurin que es la imagen oficial y estable para Java 17
 FROM eclipse-temurin:17-jdk-alpine
 
-# Directorio de trabajo
 WORKDIR /app
 
-# Usamos un asterisco en la ruta para que Docker encuentre el JAR 
-# sin importar si está en 'target/' o 'lynca/target/'
-COPY **/target/lynca-0.0.1-SNAPSHOT.jar app.jar
+# Copiamos el JAR usando la ruta exacta desde la raíz del repo
+COPY lynca/target/lynca-0.0.1-SNAPSHOT.jar app.jar
 
-# Exponemos el puerto
+# Damos permisos de lectura al archivo por si acaso
+RUN chmod 644 app.jar
+
 EXPOSE 8080
 
-# Ejecutamos la aplicación
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Usamos la ruta absoluta al JAR dentro del contenedor
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

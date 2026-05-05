@@ -1,15 +1,15 @@
-# Usamos una imagen ligera de Java 17 (o la versión que uses)
-FROM openjdk:17-jdk-slim
+# Usamos Eclipse Temurin que es la imagen oficial y estable para Java 17
+FROM eclipse-temurin:17-jdk-alpine
 
-# Definimos el directorio de trabajo
+# Directorio de trabajo
 WORKDIR /app
 
-# Copiamos el archivo JAR generado al contenedor
-# Nota: Asegúrate de que el nombre coincida con el de tu carpeta target
-COPY target/lynca-0.0.1-SNAPSHOT.jar app.jar
+# Usamos un asterisco en la ruta para que Docker encuentre el JAR 
+# sin importar si está en 'target/' o 'lynca/target/'
+COPY **/target/lynca-0.0.1-SNAPSHOT.jar app.jar
 
-# Exponemos el puerto que usará Render
+# Exponemos el puerto
 EXPOSE 8080
 
-# Comando para ejecutar la aplicación
+# Ejecutamos la aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]

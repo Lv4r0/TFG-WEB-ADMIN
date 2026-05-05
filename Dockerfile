@@ -1,9 +1,9 @@
-FROM eclipse-temurin:17-jdk-alpine
+# Cambiamos a la versión 21 para que coincida con tu compilación
+FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
 
-# Usamos el comodín asterisco para que busque el JAR en cualquier subcarpeta target
-# Esto soluciona problemas si el archivo está en /lynca/target o solo en /target
+# Mantenemos la ruta que ya funcionó para encontrar el JAR
 COPY **/lynca-0.0.1-SNAPSHOT.jar app.jar
 
 RUN chmod 644 app.jar

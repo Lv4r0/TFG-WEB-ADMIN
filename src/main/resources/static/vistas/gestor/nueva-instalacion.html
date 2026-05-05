@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lynca - Nueva Instalación</title>
+    <link rel="stylesheet" href="/estilos/gestor.css">
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .progress-bar { display: flex; margin-bottom: 30px; gap: 10px; }
+        .progress-step { flex: 1; height: 8px; background: #ddd; border-radius: 4px; }
+        .progress-step.active { background: var(--primary); }
+        .pista-row { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 10px; align-items: flex-end; }
+        .pista-row div { flex: 1; }
+    </style>
+</head>
+<body class="admin-body">
+    <div class="main-content" style="max-width: 800px; margin: auto;">
+        <header class="main-header">
+            <h1>Crear Nueva Instalación</h1>
+            <button class="btn-add" style="background:#666" onclick="location.href='dashboard-gestor.html'">Cancelar</button>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-step active" id="p-step1"></div>
+            <div class="progress-step" id="p-step2"></div>
+        </div>
+
+        <section id="step1" class="step active">
+            <div class="main-header" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                <div style="width: 100%;">
+                    <label>Nombre de la Instalación</label>
+                    <input type="text" id="instNombre" class="btn-add" style="background:white; color:black; width:95%; border:1px solid #ccc" placeholder="Ej: Polideportivo Municipal">
+                </div>
+                <div style="width: 100%;">
+                    <label>Dirección (Google Maps)</label>
+                    <input type="text" id="instDireccion" class="btn-add" style="background:white; color:black; width:95%; border:1px solid #ccc" placeholder="Calle, Número, Ciudad...">
+                </div>
+                <div style="width: 100%;">
+                    <label>Descripción</label>
+                    <textarea id="instDesc" class="btn-add" style="background:white; color:black; width:95%; border:1px solid #ccc; height:80px;"></textarea>
+                </div>
+                <div style="width: 100%;">
+                    <label>Fotos de la Instalación (puedes seleccionar varias)</label>
+                    <input type="file" id="instFotos" multiple accept="image/*" style="margin-top:10px;">
+                </div>
+                <button class="btn-add" onclick="siguientePaso(2)" style="align-self: flex-end;">Siguiente: Añadir Pistas →</button>
+            </div>
+        </section>
+
+        <section id="step2" class="step">
+            <div class="main-header" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                <h3>Configuración de Pistas</h3>
+                <div id="contenedorPistas" style="width: 100%;">
+                    </div>
+                <button class="btn-edit" onclick="añadirFilaPista()">+ Añadir otra pista</button>
+                
+                <div style="display:flex; justify-content: space-between; width: 100%; margin-top:20px;">
+                    <button class="btn-add" style="background:#666" onclick="siguientePaso(1)">← Volver</button>
+                    <button class="btn-add" onclick="finalizarRegistro()" style="background:#28a745">Finalizar y Guardar</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/scripts/app.js"></script>
+    <script>
+        let pasoActual = 1;
+
+        function siguientePaso(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+            document.getElementById('p-step2').classList.toggle('active', n === 2);
+            pasoActual = n;
+        }
+
+        function añadirFilaPista() {
+            const container = document.getElementById('contenedorPistas');
+            const div = document.createElement('div');
+            div.className = 'pista-row';
+            div.innerHTML = `
+                <div>
+                    <label>Nombre/Nº</label>
+                    <input type="text" class="p-nombre" placeholder="Pista 1" style="width:100%">
+                </div>
+                <div>
+                    <label>Deporte</label>
+                    <select class="p-deporte" style="width:100%; height:35px;">
+                        <option value="Tenis">Tenis</option>
+                        <option value="Futbol">Fútbol</option>
+                        <option value="Padel" selected>Pádel</option>
+                        <option value="Baloncesto">Baloncesto</option>
+                        <option value="Futbol Sala">Fútbol Sala</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Precio/Hora (€)</label>
+                    <input type="number" class="p-precio" value="10.00" style="width:100%">
+                </div>
+                <button class="btn-edit" style="background:#dc3545; padding:5px 10px;" onclick="this.parentElement.remove()">X</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Añadimos una pista por defecto al cargar
+        document.addEventListener("DOMContentLoaded", añadirFilaPista);
+
+        async function finalizarRegistro() {
+            const user = JSON.parse(localStorage.getItem("usuarioLynca"));
+            const inputFotos = document.getElementById("instFotos");
+            
+            // --- DATOS DE TU SUPABASE ---
+            const SUPABASE_URL = "https://ukgnvwsbngzsydhrwzeq.supabase.co"; 
+            const SUPABASE_KEY = "TU_ANON_KEY_AQUI"; // Asegúrate de que esta sea la 'anon public'
+            const BUCKET = "instalaciones-fotos";
+            // ----------------------------
+
+            console.log("Iniciando proceso... Fotos seleccionadas:", inputFotos.files.length);
+
+            try {
+                let urlsSubidas = [];
+
+                // 1. SUBIR FOTOS A SUPABASE
+                if (inputFotos.files.length > 0) {
+                    for (let file of inputFotos.files) {
+                        console.log("Subiendo archivo:", file.name);
+                        
+                        const fileName = `${Date.now()}_${file.name}`;
+                        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`;
+
+                        const resSubida = await fetch(uploadUrl, {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                                "apikey": SUPABASE_KEY,
+                                "Content-Type": file.type
+                            },
+                            body: file
+                        });
+
+                        if (resSubida.ok) {
+                            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`;
+                            console.log("¡Subida éxito! URL:", publicUrl);
+                            urlsSubidas.push({ urlImagen: publicUrl, esPrincipal: urlsSubidas.length === 0 });
+                        } else {
+                            const errorData = await resSubida.json();
+                            console.error("Fallo en Storage de Supabase:", errorData);
+                        }
+                    }
+                }
+
+                // 2. PREPARAR EL JSON PARA JAVA
+                const instData = {
+                    nombre: document.getElementById("instNombre").value,
+                    direccion: document.getElementById("instDireccion").value,
+                    descripcion: document.getElementById("instDesc").value,
+                    entidad: { id: user.id },
+                    imagenes: urlsSubidas // <--- Si urlsSubidas está vacío, aquí mandará []
+                };
+
+                console.log("Enviando este JSON a Java:", instData);
+
+                // 3. ENVIAR A TU SERVIDOR
+                const resInst = await fetch("/gestor/instalaciones", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(instData)
+                });
+
+                if (resInst.ok) {
+                    alert("¡Instalación creada con éxito!");
+                    window.location.href = "dashboard-gestor.html";
+                }
+
+            } catch (error) {
+                console.error("Error fatal en el proceso:", error);
+            }
+        }
+    </script>
+</body>
+</html>

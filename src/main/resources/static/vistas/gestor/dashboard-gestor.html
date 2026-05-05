@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script>
+        (function() {
+            const usuarioSesion = localStorage.getItem("usuarioLynca");
+            if (!usuarioSesion) {
+                window.location.href = "/vistas/publico/login.html";
+                return;
+            }
+            const usuario = JSON.parse(usuarioSesion);
+            if (usuario.rol.toUpperCase() !== "GESTOR") {
+                alert("Acceso denegado.");
+                window.location.href = "/vistas/publico/login.html";
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <title>Lynca Gestor - Mis Instalaciones</title>
+    <link rel="stylesheet" href="/estilos/gestor.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>LYNCA Gestor</h2>
+        <nav class="sidebar-menu">
+            <a href="#" class="active">🏠 Mis Instalaciones</a>
+            <a href="#">📅 Reservas</a>
+            <a href="#" onclick="cerrarSesion()">🚪 Cerrar Sesión</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <div>
+                <h1 id="welcomeText" style="margin:0">Panel de Control</h1>
+                <p style="margin:5px 0 0 0; color:#666">Gestiona tus instalaciones deportivas</p>
+            </div>
+            <button class="btn-add" onclick="window.location.href='nueva-instalacion.html'">+ Añadir Instalación</button>
+        </header>
+
+        <div id="gridInstalaciones" class="instalaciones-grid">
+            <p style="text-align: center; grid-column: 1 / span 3;">Cargando instalaciones...</p>
+        </div>
+    </main>
+
+    <script src="/scripts/app.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const grid = document.getElementById("gridInstalaciones");
+            const welcomeText = document.getElementById("welcomeText");
+
+            try {
+                // 1. Obtener los datos del usuario logueado
+                const usuario = JSON.parse(localStorage.getItem("usuarioLynca"));
+                if (usuario && usuario.nombreCompleto) {
+                    welcomeText.innerText = "Panel de " + usuario.nombreCompleto;
+                }
+
+                // 2. Llamar al servidor para traer las instalaciones de este gestor
+                // Usamos la ruta /gestor/instalaciones/{id} que definimos en el controlador
+                const response = await fetch(`/gestor/instalaciones/${usuario.id}`);
+                
+                if (!response.ok) throw new Error("Error al obtener datos");
+
+                const instalaciones = await response.json();
+                console.log("Instalaciones recibidas:", instalaciones);
+
+                // 3. Limpiar el contenedor
+                grid.innerHTML = "";
+
+                // 4. Si no hay nada, mostrar el "Estado Vacío"
+                if (instalaciones.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <p style="font-size: 3rem; margin: 0;">🏟️</p>
+                            <h3>No tienes instalaciones creadas</h3>
+                            <p>Para empezar a recibir reservas, añade tu primer centro deportivo.</p>
+                            <button class="btn-add" onclick="window.location.href='nueva-instalacion.html'">Crear mi primera instalación</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 5. Si hay datos, pintar las tarjetas
+                grid.innerHTML = instalaciones.map(inst => `
+                    <div class="instalacion-card">
+                        <img src="${(inst.imagenes && inst.imagenes.length > 0) ? inst.imagenes[0].urlImagen : 'https://placehold.co/400x200?text=Sin+Foto'}" 
+                            onerror="this.src='https://placehold.co/400x200?text=Error+Carga'" 
+                            alt="Foto">
+                        <div class="card-body">
+                            <h3>${inst.nombre}</h3>
+                            <p>📍 ${inst.direccion}</p>
+                            <button class="btn-add" style="width:100%" onclick="window.location.href='gestionar-instalacion.html?id=${inst.id}'">Gestionar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error("Error cargando el dashboard:", error);
+                grid.innerHTML = `<p style="color:red; text-align:center; grid-column: 1 / span 3;">Error al conectar con el servidor. Inténtalo de nuevo más tarde.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

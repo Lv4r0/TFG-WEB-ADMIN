@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lynca - Panel de Gestor</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <header>
+        <h1>Lynca: Gestión de Instalaciones</h1>
+        <p>Panel de Control para Clubes y Ayuntamientos</p>
+    </header>
+
+    <main>
+        <section id="formulario">
+            <h2>Añadir Nueva Pista</h2>
+            <form id="pistaForm">
+                <input type="text" id="nombre" placeholder="Nombre (ej: Pista 5)" required>
+                <select id="tipoDeporte">
+                    <option value="Fútbol">Fútbol</option>
+                    <option value="Tenis">Tenis</option>
+                    <option value="Pádel">Pádel</option>
+                    <option value="Baloncesto">Baloncesto</option>
+                </select>
+                <input type="number" id="precio" placeholder="Precio por hora" step="0.01" required>
+                <button type="submit">Dar de Alta Pista</button>
+            </form>
+        </section>
+
+        <section id="listado">
+            <h2>Tus Pistas Disponibles</h2>
+            <div id="contenedorPistas" class="grid-pistas">
+                </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

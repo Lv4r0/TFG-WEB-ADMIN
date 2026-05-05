@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script>
+        (function() {
+            const usuarioSesion = localStorage.getItem("usuarioLynca");
+            if (!usuarioSesion) {
+                window.location.href = "/vistas/publico/login.html";
+                return;
+            }
+            const usuario = JSON.parse(usuarioSesion);
+            // Si no es ADMIN, lo echamos al login
+            if (usuario.rol.toUpperCase() !== "ADMIN") {
+                alert("Acceso denegado: Esta zona es exclusiva para Administradores.");
+                window.location.href = "/vistas/publico/login.html";
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <title>Lynca - Panel Maestro</title>
+    <link rel="stylesheet" href="/estilos/estilos.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>LYNCA</h2>
+            </div>
+            <ul class="sidebar-menu">
+            <li><a href="#" class="active" onclick="mostrarVista('entidades')">📍 Entidades</a></li>
+            <li><a href="#" onclick="mostrarVista('usuarios')">👥 Usuarios</a></li>
+            <li><a href="#" onclick="mostrarVista('ajustes')">⚙️ Ajustes</a></li>
+        </ul>
+            <button onclick="cerrarSesion()" class="btn-logout">Cerrar Sesión</button>
+        </nav>
+
+        <main class="content">
+            <div id="view-entidades" class="admin-view">
+                <header class="view-header">
+                    <h1>Gestión de Entidades</h1>
+                    <p>Ayuntamientos y Clubes registrados en la plataforma.</p>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Entidades Activas</h3>
+                        <p id="countEntidades">0</p>
+                    </div>
+                </div>
+
+                <section class="data-section">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>CIF</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaEntidades"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-usuarios" class="admin-view" style="display: none;">
+                <header class="view-header">
+                    <h1>Gestión de Usuarios</h1>
+                    <p>Control global de perfiles de deportistas en Lynca.</p>
+                </header>
+
+                <div class="search-bar">
+                    <input type="text" id="searchEmail" placeholder="🔍 Buscar por Email..." onkeyup="filtrarTabla()">
+                </div>
+
+                <section class="data-section">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaUsuarios">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lynca - Gestionar Instalación</title>
+    <link rel="stylesheet" href="/estilos/gestor.css">
+    <style>
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+        .modal-content { background: white; width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 15px; max-height: 85vh; overflow-y: auto; }
+        .franja-item { display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 8px; }
+    </style>
+</head>
+<body class="admin-body">
+    <div class="main-content" style="max-width: 900px; margin: auto;">
+        
+        <header class="main-header">
+            <div>
+                <h1 id="tituloEditar">Editar Instalación</h1>
+                <p>Modifica los datos, fotos o gestiona las pistas.</p>
+            </div>
+            <button class="btn-add" style="background:#666" onclick="location.href='dashboard-gestor.html'">Volver</button>
+        </header>
+
+        <div class="main-header" style="flex-direction: column; align-items: flex-start; gap: 20px;">
+            <div style="width: 100%;">
+                <label>Nombre de la Instalación</label>
+                <input type="text" id="editNombre" class="btn-add" style="background:white; color:black; width:98%; border:1px solid #ccc">
+            </div>
+            <div style="width: 100%;">
+                <label>Dirección</label>
+                <input type="text" id="editDireccion" class="btn-add" style="background:white; color:black; width:98%; border:1px solid #ccc">
+            </div>
+            <div style="width: 100%;">
+                <label>Descripción</label>
+                <textarea id="editDesc" class="btn-add" style="background:white; color:black; width:98%; border:1px solid #ccc; height:80px;"></textarea>
+            </div>
+
+            <div style="width: 100%;">
+                <label>Fotos de la instalación</label>
+                <div id="fotosActuales" style="display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 10px;"></div>
+                <label style="margin-top: 15px; display: block;">Añadir más fotos a la instalación</label>
+                <input type="file" id="nuevasFotos" multiple accept="image/*">
+            </div>
+
+            <button class="btn-add" onclick="guardarCambios()" style="width: 100%; background: #28a745;">Guardar Datos Instalación</button>
+        </div>
+
+        <div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Pistas Individuales</h2>
+            <button class="btn-add" onclick="abrirModalNuevaPista()">+ Añadir Nueva Pista</button>
+        </div>
+
+        <div id="listaPistas" class="instalaciones-grid" style="margin-top: 20px;"></div>
+    </div>
+
+    <div id="modalPista" class="modal">
+        <div class="modal-content">
+            <h2 id="modalPistaTitulo">Gestionar Pista</h2>
+            <hr>
+            <div style="display: grid; gap: 15px; margin-top: 20px;">
+                <div>
+                    <label>Nombre de la Pista</label>
+                    <input type="text" id="pistaNombre" class="btn-add" style="background:white; color:black; width:95%; border:1px solid #ccc">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex:1">
+                        <label>Deporte</label>
+                        <select id="pistaDeporte" class="btn-add" style="background:white; color:black; width:100%; border:1px solid #ccc">
+                            <option value="Padel">Pádel</option>
+                            <option value="Tenis">Tenis</option>
+                            <option value="Futbol">Fútbol</option>
+                            <option value="Baloncesto">Baloncesto</option>
+                            <option value="Futbol Sala">Fútbol Sala</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                        <label>Precio por Franja (€)</label>
+                        <input type="number" id="pistaPrecio" class="btn-add" style="background:white; color:black; width:90%; border:1px solid #ccc">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Descripción de la Pista</label>
+                    <textarea id="pistaDesc" class="btn-add" style="background:white; color:black; width:95%; border:1px solid #ccc; height:60px; font-family: sans-serif;"></textarea>
+                </div>
+
+                <div>
+                    <label>Estado General</label>
+                    <select id="pistaEstado" class="btn-add" style="background:white; color:black; width:100%; border:1px solid #ccc">
+                        <option value="Operativa">Operativa</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                    </select>
+                </div>
+
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 10px;">
+                    <label><strong>Franjas y Estados Individuales</strong></label>
+                    <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px;">
+                        <input type="time" id="horaInicio" style="padding: 8px; border-radius: 5px; border:1px solid #ccc">
+                        <span style="align-self: center;">a</span>
+                        <input type="time" id="horaFin" style="padding: 8px; border-radius: 5px; border:1px solid #ccc">
+                        <button type="button" onclick="agregarFranja()" style="background: var(--primary); color:white; border:none; padding: 0 15px; border-radius: 5px; cursor:pointer;">Añadir</button>
+                    </div>
+                    <div id="contenedorFranjas"></div>
+                </div>
+
+                <div>
+                    <label>Fotos de esta pista</label>
+                    <div id="fotosPistaActuales" style="display: flex; gap: 10px; margin: 10px 0; overflow-x: auto;"></div>
+                    <input type="file" id="pistaNuevasFotos" multiple accept="image/*">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button class="btn-add" onclick="cerrarModal()" style="background: #666; flex: 1;">Cancelar</button>
+                <button class="btn-add" id="btnGuardarPista" onclick="guardarPista()" style="background: #28a745; flex: 1;">Guardar Pista</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/scripts/app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const instId = urlParams.get('id');
+        
+        const SUPABASE_URL = "https://ukgnvwsbngzsydhrwzeq.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ252d3Nibmd6c3lkaHJ3emVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjM2NDIsImV4cCI6MjA5MDUzOTY0Mn0.-eLMN53F6anRIe6H34hY2AbTsSSCnn5sdrBrd6LqYpo";
+        const BUCKET = "instalaciones-fotos";
+
+        let franjasHorarias = [];
+        let idPistaEditando = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarDatosInstalacion();
+            cargarPistas();
+        });
+
+        // --- LÓGICA DE INSTALACIÓN ---
+
+        async function cargarDatosInstalacion() {
+            if (!instId) return;
+            try {
+                const res = await fetch(`/gestor/instalaciones/detalle/${instId}`);
+                const inst = await res.json();
+                document.getElementById("editNombre").value = inst.nombre;
+                document.getElementById("editDireccion").value = inst.direccion;
+                document.getElementById("editDesc").value = inst.descripcion || "";
+                document.getElementById("tituloEditar").innerText = "Gestionar " + inst.nombre;
+
+                const contenedorFotos = document.getElementById("fotosActuales");
+                contenedorFotos.innerHTML = (inst.imagenes || []).map(img => `
+                    <div id="foto-${img.id}" style="position:relative; display:inline-block;">
+                        <img src="${img.urlImagen}" style="width:120px; height:80px; object-fit:cover; border-radius:8px;">
+                        <button onclick="confirmarBorradoFoto('${img.id}', '${img.urlImagen}')" 
+                            style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-weight:bold;">X</button>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function guardarCambios() {
+            const inputFotos = document.getElementById("nuevasFotos");
+            try {
+                let nuevasUrls = [];
+                if (inputFotos.files.length > 0) {
+                    for (let file of inputFotos.files) {
+                        const fileName = `inst_${Date.now()}_${file.name}`;
+                        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`;
+                        const resSubida = await fetch(uploadUrl, {
+                            method: "POST",
+                            headers: { "Authorization": `Bearer ${SUPABASE_KEY}`, "apikey": SUPABASE_KEY, "Content-Type": file.type },
+                            body: file
+                        });
+                        if (resSubida.ok) {
+                            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`;
+                            nuevasUrls.push({ urlImagen: publicUrl, esPrincipal: false });
+                        }
+                    }
+                }
+                const datos = {
+                    nombre: document.getElementById("editNombre").value,
+                    direccion: document.getElementById("editDireccion").value,
+                    descripcion: document.getElementById("editDesc").value,
+                    imagenes: nuevasUrls
+                };
+                const res = await fetch(`/gestor/instalaciones/${instId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datos)
+                });
+                if (res.ok) alert("Instalación actualizada correctamente");
+            } catch (e) { console.error(e); }
+        }
+
+        async function confirmarBorradoFoto(idImagen, urlImagen) {
+            if (!confirm("¿Borrar foto de la instalación?")) return;
+            const resJava = await fetch(`/gestor/imagenes/${idImagen}`, { method: 'DELETE' });
+            if (resJava.ok) {
+                const fileName = urlImagen.split('/').pop();
+                await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`, {
+                    method: 'DELETE',
+                    headers: { "Authorization": `Bearer ${SUPABASE_KEY}`, "apikey": SUPABASE_KEY }
+                });
+                document.getElementById(`foto-${idImagen}`).remove();
+            }
+        }
+
+        // --- LÓGICA DE PISTAS ---
+
+        async function cargarPistas() {
+            const res = await fetch(`/gestor/pistas/${instId}`);
+            const pistas = await res.json();
+            const contenedor = document.getElementById("listaPistas");
+            contenedor.innerHTML = pistas.map(p => `
+                <div class="instalacion-card">
+                    <div class="card-body">
+                        <h3>${p.nombre}</h3>
+                        <p>Deporte: ${p.tipoDeporte}<br>Estado: <b>${p.estado}</b></p>
+                        <button class="btn-add" onclick="abrirModalPista('${p.id}')">Gestionar Pista</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function abrirModalNuevaPista() {
+            idPistaEditando = null;
+            franjasHorarias = [];
+            document.getElementById("pistaNombre").value = "";
+            document.getElementById("pistaPrecio").value = "10";
+            document.getElementById("pistaEstado").value = "Operativa";
+            document.getElementById("pistaDesc").value = "";
+            document.getElementById("fotosPistaActuales").innerHTML = "";
+            document.getElementById("modalPistaTitulo").innerText = "Añadir Nueva Pista";
+            renderizarFranjas();
+            document.getElementById("modalPista").style.display = "block";
+        }
+
+        async function abrirModalPista(id) {
+            idPistaEditando = id;
+            const res = await fetch(`/gestor/pistas/detalle/${id}`);
+            const p = await res.json();
+            document.getElementById("pistaNombre").value = p.nombre;
+            document.getElementById("pistaPrecio").value = p.precioHora;
+            document.getElementById("pistaEstado").value = p.estado;
+            document.getElementById("pistaDeporte").value = p.tipoDeporte || "Padel";
+            document.getElementById("pistaDesc").value = p.descripcion || "";
+            document.getElementById("modalPistaTitulo").innerText = "Editar " + p.nombre;
+            
+            // Mostrar fotos de la pista
+            const contFotosPista = document.getElementById("fotosPistaActuales");
+            contFotosPista.innerHTML = (p.imagenes || []).map(img => `
+                <div id="foto-pista-${img.id}" style="position:relative;">
+                    <img src="${img.urlImagen}" style="width:80px; height:60px; object-fit:cover; border-radius:5px;">
+                    <button onclick="confirmarBorradoFotoPista('${img.id}', '${img.urlImagen}')" 
+                        style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; font-size:10px;">X</button>
+                </div>
+            `).join('');
+
+            franjasHorarias = p.horario ? JSON.parse(p.horario) : [];
+            renderizarFranjas();
+            document.getElementById("modalPista").style.display = "block";
+        }
+
+        function agregarFranja() {
+            const ini = document.getElementById("horaInicio").value;
+            const fin = document.getElementById("horaFin").value;
+            if (ini && fin) {
+                franjasHorarias.push({ inicio: ini, fin: fin, estado: "Libre" });
+                franjasHorarias.sort((a,b) => a.inicio.localeCompare(b.inicio));
+                renderizarFranjas();
+            }
+        }
+
+        function cambiarEstadoFranja(index, nuevoEstado) {
+            franjasHorarias[index].estado = nuevoEstado;
+        }
+
+        function quitarFranja(index) {
+            franjasHorarias.splice(index, 1);
+            renderizarFranjas();
+        }
+
+        function renderizarFranjas() {
+            const cont = document.getElementById("contenedorFranjas");
+            cont.innerHTML = franjasHorarias.map((f, i) => `
+                <div class="franja-item">
+                    <span style="font-weight: bold; min-width: 100px;">${f.inicio} - ${f.fin}</span>
+                    <select onchange="cambiarEstadoFranja(${i}, this.value)" style="flex:1; padding:5px; border-radius:5px;">
+                        <option value="Libre" ${f.estado === 'Libre' ? 'selected' : ''}>Libre</option>
+                        <option value="Reservada" ${f.estado === 'Reservada' ? 'selected' : ''}>Reservada</option>
+                        <option value="Mantenimiento" ${f.estado === 'Mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
+                    </select>
+                    <button onclick="quitarFranja(${i})" style="color:red; border:none; background:none; cursor:pointer; font-size: 1.2rem;">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        async function guardarPista() {
+            const btn = document.getElementById("btnGuardarPista");
+            const inputFotosPista = document.getElementById("pistaNuevasFotos");
+            btn.disabled = true;
+            btn.innerText = "Guardando...";
+
+            try {
+                // 1. Subir fotos de la Pista a Supabase
+                let urlsFotosPista = [];
+                if (inputFotosPista.files.length > 0) {
+                    for (let file of inputFotosPista.files) {
+                        const fileName = `pista_${Date.now()}_${file.name}`;
+                        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`;
+                        const resSub = await fetch(uploadUrl, {
+                            method: "POST",
+                            headers: { "Authorization": `Bearer ${SUPABASE_KEY}`, "apikey": SUPABASE_KEY, "Content-Type": file.type },
+                            body: file
+                        });
+                        if (resSub.ok) {
+                            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${fileName}`;
+                            urlsFotosPista.push({ urlImagen: publicUrl, esPrincipal: false });
+                        }
+                    }
+                }
+
+                // 2. Preparar JSON para Java
+                const datos = {
+                    nombre: document.getElementById("pistaNombre").value,
+                    tipoDeporte: document.getElementById("pistaDeporte").value,
+                    precioHora: document.getElementById("pistaPrecio").value,
+                    descripcion: document.getElementById("pistaDesc").value,
+                    estado: document.getElementById("pistaEstado").value,
+                    horario: JSON.stringify(franjasHorarias),
+                    instalacion: { id: instId },
+                    imagenes: urlsFotosPista
+                };
+
+                const url = idPistaEditando ? `/gestor/pistas/${idPistaEditando}` : `/gestor/pistas`;
+                const method = idPistaEditando ? "PUT" : "POST";
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datos)
+                });
+
+                if (res.ok) {
+                    alert("Pista guardada con éxito");
+                    cerrarModal();
+                    cargarPistas();
+                } else {
+                    alert("Error al guardar la pista.");
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Guardar Pista";
+            }
+        }
+
+        async function confirmarBorradoFotoPista(idFoto, urlFoto) {
+            if (!confirm("¿Borrar esta foto de la pista?")) return;
+            const res = await fetch(`/gestor/pistas/imagenes/${idFoto}`, { method: 'DELETE' });
+            if (res.ok) {
+                const fileName = urlFoto.split('/').pop();
+                await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`, {
+                    method: 'DELETE',
+                    headers: { "Authorization": `Bearer ${SUPABASE_KEY}`, "apikey": SUPABASE_KEY }
+                });
+                document.getElementById(`foto-pista-${idFoto}`).remove();
+            }
+        }
+
+        function cerrarModal() { document.getElementById("modalPista").style.display = "none"; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+/* Variables de color para Lynca */
+:root {
+    --primary: #1a237e;
+    --secondary: #303f9f;
+    --bg-light: #f4f7f6;
+    --text-dark: #333;
+    --white: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar Estilo Profesional */
+.sidebar {
+    width: 260px;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    flex-shrink: 0; /* Evita que la barra lateral se encoja */
+}
+
+.sidebar h2 {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-menu a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* Contenido Principal */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-add {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    text-align: center;
+}
+
+.btn-add:hover {
+    background-color: var(--secondary);
+}
+
+/* Grid de Instalaciones - ACTUALIZADO */
+.instalaciones-grid {
+    display: grid;
+    /* Usa auto-fill para que sea responsivo si hay pocas o muchas cartas */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 25px;
+    align-items: stretch; /* Obliga a las cartas de una fila a medir lo mismo */
+}
+
+/* Tarjeta - ACTUALIZADA */
+.instalacion-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: 0.3s;
+    
+    display: flex;
+    flex-direction: column; /* Alinea los elementos en vertical */
+    height: 100%; /* Ocupa todo el alto disponible de la fila */
+}
+
+.instalacion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.instalacion-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background-color: #eee;
+    display: block;
+}
+
+/* Cuerpo de la tarjeta - ACTUALIZADO */
+.card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Hace que el cuerpo crezca para llenar la tarjeta */
+}
+
+.card-body h3 { 
+    margin: 0 0 10px 0; 
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.card-body p { 
+    color: #666; 
+    margin-bottom: 20px; 
+    line-height: 1.5;
+    flex-grow: 1; /* Empuja el botón hacia abajo si el texto es corto */
+}
+
+/* El botón de gestionar dentro de la tarjeta */
+.card-body .btn-add {
+    margin-top: auto; /* Se pega al fondo del contenedor flex */
+    width: 100%;
+}
+
+/* Estado Vacío */
+.empty-state {
+    grid-column: 1 / -1; /* Ocupa todo el ancho del grid */
+    text-align: center;
+    padding: 80px;
+    background: white;
+    border-radius: 20px;
+    border: 2px dashed #ddd;
+}

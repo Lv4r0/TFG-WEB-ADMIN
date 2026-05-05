@@ -2,13 +2,12 @@ FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copiamos el JAR usando la ruta exacta desde la raíz del repo
-COPY lynca/target/lynca-0.0.1-SNAPSHOT.jar app.jar
+# Usamos el comodín asterisco para que busque el JAR en cualquier subcarpeta target
+# Esto soluciona problemas si el archivo está en /lynca/target o solo en /target
+COPY **/lynca-0.0.1-SNAPSHOT.jar app.jar
 
-# Damos permisos de lectura al archivo por si acaso
 RUN chmod 644 app.jar
 
 EXPOSE 8080
 
-# Usamos la ruta absoluta al JAR dentro del contenedor
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
